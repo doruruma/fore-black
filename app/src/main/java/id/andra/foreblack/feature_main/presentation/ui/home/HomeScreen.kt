@@ -39,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import id.andra.foreblack.R
 import id.andra.foreblack.feature_main.presentation.components.OnLifecycleEvent
-import id.andra.foreblack.feature_main.util.OverlayService
+import id.andra.foreblack.feature_main.service.OverlayService
 import id.andra.foreblack.ui.theme.Neutral80
 import id.andra.foreblack.ui.theme.Neutral90
 
@@ -149,8 +149,10 @@ fun HomeScreen(
                             viewModel.onEvent(HomeEvent.OnClickRequestPermission)
                             return@Button
                         }
-                        val intent = Intent(context, OverlayService::class.java)
-                        context.startService(intent)
+                        Intent(context, OverlayService::class.java).apply {
+                            action = OverlayService.ACTION_START
+                            context.startService(this)
+                        }
                     }
                 ) {
                     Text(

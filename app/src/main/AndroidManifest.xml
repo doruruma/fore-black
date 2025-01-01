@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:name=".ForeBlack"
@@ -28,8 +30,9 @@
         <activity android:name=".feature_main.presentation.OverlayTriggerActivity" />
 
         <service
-            android:name=".feature_main.util.OverlayService"
+            android:name=".feature_main.service.OverlayService"
             android:exported="true"
+            android:foregroundServiceType="specialUse"
             android:permission="android.permission.SYSTEM_ALERT_WINDOW" />
     </application>
 

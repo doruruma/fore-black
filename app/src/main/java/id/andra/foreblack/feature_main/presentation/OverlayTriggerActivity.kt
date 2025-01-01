@@ -3,7 +3,7 @@ package id.andra.foreblack.feature_main.presentation
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import id.andra.foreblack.feature_main.util.OverlayService
+import id.andra.foreblack.feature_main.service.OverlayService
 
 class OverlayTriggerActivity : Activity() {
 
