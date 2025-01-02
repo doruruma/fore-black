@@ -27,7 +27,7 @@ class OverlayService : Service() {
     lateinit var serviceLifecycleOwner: ServiceLifecycleOwner
 
     private lateinit var windowManager: WindowManager
-    private lateinit var composeView: ComposeView
+    private var composeView: ComposeView? = null
     private lateinit var savedStateRegistryOwner: ServiceSavedStateRegistryOwner
 
     private val CHANNEL_ID = "overlay_channel_id"
@@ -47,50 +47,58 @@ class OverlayService : Service() {
         savedStateRegistryOwner.start()
         // Start the lifecycle
         serviceLifecycleOwner.start()
-        // Create a new ComposeView
-        composeView = ComposeView(this).apply {
-            setViewTreeLifecycleOwner(serviceLifecycleOwner)
-            setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-            setContent {
-                BlackScreen()
-            }
-        }
-        // Set the layout parameters for the overlay
-        val layoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            android.graphics.PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-        }
-        // Add the view to the window
-        windowManager.addView(composeView, layoutParams)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stop()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_START -> start()
+            ACTION_START -> start(intent)
             ACTION_STOP -> stop()
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun start() {
-        // Create the overlay and the notification
-        createNotification()
-        // Make the service a foreground service with a notification
+    private fun start(intent: Intent?) {
         startForeground(NOTIFICATION_ID, createNotification())
+        val visibility = intent?.getStringExtra("VISIBILITY")
+        when (visibility) {
+            SHOW_OVERLAY -> {
+                // Set the layout parameters for the overlay
+                val layoutParams = WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    android.graphics.PixelFormat.TRANSLUCENT
+                ).apply {
+                    gravity = Gravity.TOP or Gravity.START
+                }
+                // Create a new ComposeView
+                composeView = ComposeView(this).apply {
+                    setViewTreeLifecycleOwner(serviceLifecycleOwner)
+                    setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+                    setContent {
+                        BlackScreen()
+                    }
+                }
+                // Add the view to the window
+                windowManager.addView(composeView, layoutParams)
+            }
+
+            HIDE_OVERLAY -> {
+                // Remove the view
+                windowManager.removeView(composeView)
+                composeView = null
+            }
+
+            else -> {}
+        }
     }
 
     private fun stop() {
         windowManager.removeView(composeView)
+        composeView = null
         stopForeground(STOP_FOREGROUND_REMOVE)
         savedStateRegistryOwner.stop()
         serviceLifecycleOwner.stop()
@@ -109,9 +117,10 @@ class OverlayService : Service() {
         notificationManager.createNotificationChannel(channel)
         // Create a PendingIntent that will launch the service to show the overlay
         val overlayIntent = Intent(this, OverlayService::class.java).apply {
-            action = "SHOW_OVERLAY"
+            putExtra("VISIBILITY", SHOW_OVERLAY)
+            action = ACTION_START
         }
-        val pendingIntent = PendingIntent.getActivity(
+        val pendingIntent = PendingIntent.getService(
             this,
             0,
             overlayIntent,
@@ -119,10 +128,10 @@ class OverlayService : Service() {
         )
         // Build the notification
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Overlay Service")
+            .setContentTitle("Fore Black")
             .setContentText("Tap to show black screen overlay")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_menu_view, "Enable Fore Black", pendingIntent)
             .setOngoing(true)
             .build()
     }
@@ -130,6 +139,8 @@ class OverlayService : Service() {
     companion object {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
+        const val SHOW_OVERLAY = "SHOW_OVERLAY"
+        const val HIDE_OVERLAY = "HIDE_OVERLAY"
     }
 
 }
