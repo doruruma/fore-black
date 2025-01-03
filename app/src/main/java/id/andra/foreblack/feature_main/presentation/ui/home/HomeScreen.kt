@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +36,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -46,19 +46,22 @@ import id.andra.foreblack.feature_main.util.hasPermission
 import id.andra.foreblack.feature_main.util.isMyServiceRunning
 import id.andra.foreblack.ui.theme.Neutral80
 import id.andra.foreblack.ui.theme.Neutral90
-
-@Preview
-@Composable
-private fun HomePreview() {
-    HomeScreen()
-}
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen() {
 
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var isPermissionGranted by remember {
         mutableStateOf(Settings.canDrawOverlays(context))
+    }
+    var isServiceRunning by remember {
+        mutableStateOf(context.isMyServiceRunning(OverlayService::class.java))
+    }
+    var btnLabel by remember {
+        mutableStateOf("Go To Settings")
     }
     var notificationPermissionCallback by remember {
         mutableStateOf({})
@@ -86,14 +89,31 @@ fun HomeScreen() {
         }
     }
 
-    fun getMainButtonLabel(): String {
-        return if (isPermissionGranted)
-            if (context.isMyServiceRunning(OverlayService::class.java)) "Disable Fore Black" else "Enable Fore Black"
-        else "Go To Setting"
+    fun toggleService() = coroutineScope.launch {
+        val serviceAction =
+            if (isServiceRunning) OverlayService.ACTION_STOP else OverlayService.ACTION_START
+        coroutineScope.launch {
+            Intent(context, OverlayService::class.java).apply {
+                action = serviceAction
+                context.startService(this)
+            }
+        }.join()
+        delay(500)
+        isServiceRunning = context.isMyServiceRunning(OverlayService::class.java)
     }
 
     LaunchedEffect(true) {
         requestNotificationPermission()
+    }
+
+    LaunchedEffect(isPermissionGranted, isServiceRunning) {
+        btnLabel = if (isPermissionGranted)
+            if (isServiceRunning)
+                "Disable Fore Black"
+            else
+                "Enable Fore Black"
+        else
+            "Go To Settings"
     }
 
     OnLifecycleEvent { _, event ->
@@ -167,23 +187,17 @@ fun HomeScreen() {
                         }
                         if (!context.hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
                             notificationPermissionCallback = {
-                                Intent(context, OverlayService::class.java).apply {
-                                    action = OverlayService.ACTION_START
-                                    context.startService(this)
-                                }
+                                toggleService()
                             }
                             requestNotificationPermission()
                             return@Button
                         }
-                        Intent(context, OverlayService::class.java).apply {
-                            action = OverlayService.ACTION_START
-                            context.startService(this)
-                        }
+                        toggleService()
                     }
                 ) {
                     Text(
                         style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
-                        text = getMainButtonLabel()
+                        text = btnLabel
                     )
                 }
             }

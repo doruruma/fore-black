@@ -21,6 +21,7 @@
         <activity
             android:name=".feature_main.presentation.MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.ForeBlack">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,6 +29,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".feature_main.presentation.OverlayServiceActivity"
+            android:launchMode="singleTask" />
 
         <service
             android:name=".feature_main.service.OverlayService"
