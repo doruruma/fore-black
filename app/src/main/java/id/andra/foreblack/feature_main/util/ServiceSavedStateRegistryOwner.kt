@@ -23,10 +23,6 @@ class ServiceSavedStateRegistryOwner : SavedStateRegistryOwner {
     override val savedStateRegistry: SavedStateRegistry
         get() = _savedStateRegistryController.savedStateRegistry
 
-    fun performSave(outState: Bundle) {
-        _savedStateRegistryController.performSave(outState)
-    }
-
     fun performRestore(savedState: Bundle?) {
         _savedStateRegistryController.performRestore(savedState)
     }

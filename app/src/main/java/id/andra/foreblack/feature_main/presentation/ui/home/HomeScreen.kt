@@ -1,9 +1,13 @@
 package id.andra.foreblack.feature_main.presentation.ui.home
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,11 +38,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import id.andra.foreblack.R
 import id.andra.foreblack.feature_main.presentation.components.OnLifecycleEvent
 import id.andra.foreblack.feature_main.service.OverlayService
+import id.andra.foreblack.feature_main.util.hasPermission
+import id.andra.foreblack.feature_main.util.isMyServiceRunning
 import id.andra.foreblack.ui.theme.Neutral80
 import id.andra.foreblack.ui.theme.Neutral90
 
@@ -50,14 +54,26 @@ private fun HomePreview() {
 }
 
 @Composable
-fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
-) {
+fun HomeScreen() {
 
-    val state = viewModel.state.collectAsState().value
     val context = LocalContext.current
     var isPermissionGranted by remember {
         mutableStateOf(Settings.canDrawOverlays(context))
+    }
+    var notificationPermissionCallback by remember {
+        mutableStateOf({})
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {
+            notificationPermissionCallback.invoke()
+            notificationPermissionCallback = {}
+        }
+    )
+
+    fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     fun requestOverlayPermission(context: Context) {
@@ -70,14 +86,14 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(true) {
-        viewModel.onEvent(HomeEvent.OnLoad)
+    fun getMainButtonLabel(): String {
+        return if (isPermissionGranted)
+            if (context.isMyServiceRunning(OverlayService::class.java)) "Disable Fore Black" else "Enable Fore Black"
+        else "Go To Setting"
     }
 
-    LaunchedEffect(state.isRequestingPermission) {
-        if (!state.isRequestingPermission)
-            return@LaunchedEffect
-        requestOverlayPermission(context)
+    LaunchedEffect(true) {
+        requestNotificationPermission()
     }
 
     OnLifecycleEvent { _, event ->
@@ -146,7 +162,17 @@ fun HomeScreen(
                     contentPadding = PaddingValues(vertical = 14.dp),
                     onClick = {
                         if (!isPermissionGranted) {
-                            viewModel.onEvent(HomeEvent.OnClickRequestPermission)
+                            requestOverlayPermission(context)
+                            return@Button
+                        }
+                        if (!context.hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
+                            notificationPermissionCallback = {
+                                Intent(context, OverlayService::class.java).apply {
+                                    action = OverlayService.ACTION_START
+                                    context.startService(this)
+                                }
+                            }
+                            requestNotificationPermission()
                             return@Button
                         }
                         Intent(context, OverlayService::class.java).apply {
@@ -157,7 +183,7 @@ fun HomeScreen(
                 ) {
                     Text(
                         style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
-                        text = if (isPermissionGranted) "Get Started" else "Go To Setting"
+                        text = getMainButtonLabel()
                     )
                 }
             }

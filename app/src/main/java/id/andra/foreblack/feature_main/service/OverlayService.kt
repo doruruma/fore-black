@@ -30,7 +30,7 @@ class OverlayService : Service() {
     private var composeView: ComposeView? = null
     private lateinit var savedStateRegistryOwner: ServiceSavedStateRegistryOwner
 
-    private val CHANNEL_ID = "overlay_channel_id"
+    private val CHANNEL_ID = "OVERLAY_CHANNEL"
     private val NOTIFICATION_ID = 1
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -106,7 +106,6 @@ class OverlayService : Service() {
     }
 
     private fun createNotification(): Notification {
-        // Create Notification Channel for devices running Android O and above
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Overlay Service",
