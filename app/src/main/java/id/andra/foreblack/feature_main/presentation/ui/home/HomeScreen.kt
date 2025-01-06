@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +45,7 @@ import id.andra.foreblack.feature_main.presentation.components.OnLifecycleEvent
 import id.andra.foreblack.feature_main.service.OverlayService
 import id.andra.foreblack.feature_main.util.hasPermission
 import id.andra.foreblack.feature_main.util.isMyServiceRunning
+import id.andra.foreblack.ui.theme.Neutral10
 import id.andra.foreblack.ui.theme.Neutral80
 import id.andra.foreblack.ui.theme.Neutral90
 import kotlinx.coroutines.delay
@@ -59,6 +61,9 @@ fun HomeScreen() {
     }
     var isServiceRunning by remember {
         mutableStateOf(context.isMyServiceRunning(OverlayService::class.java))
+    }
+    var isBtnLoading by remember {
+        mutableStateOf(false)
     }
     var btnLabel by remember {
         mutableStateOf("Go To Settings")
@@ -90,16 +95,17 @@ fun HomeScreen() {
     }
 
     fun toggleService() = coroutineScope.launch {
+        isBtnLoading = true
         val serviceAction =
             if (isServiceRunning) OverlayService.ACTION_STOP else OverlayService.ACTION_START
-        coroutineScope.launch {
-            Intent(context, OverlayService::class.java).apply {
-                action = serviceAction
-                context.startService(this)
-            }
-        }.join()
-        delay(500)
+        Intent(context, OverlayService::class.java).apply {
+            action = serviceAction
+            context.startService(this)
+        }
+        delay(300)
         isServiceRunning = context.isMyServiceRunning(OverlayService::class.java)
+        delay(300)
+        isBtnLoading = false
     }
 
     LaunchedEffect(true) {
@@ -180,6 +186,7 @@ fun HomeScreen() {
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(vertical = 14.dp),
+                    enabled = !isBtnLoading,
                     onClick = {
                         if (!isPermissionGranted) {
                             requestOverlayPermission(context)
@@ -193,8 +200,19 @@ fun HomeScreen() {
                             return@Button
                         }
                         toggleService()
+                        Intent(context, OverlayService::class.java).apply {
+                            action = OverlayService.ACTION_START
+                            context.startService(this)
+                        }
                     }
                 ) {
+                    if (isBtnLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = Neutral10
+                        )
+                        return@Button
+                    }
                     Text(
                         style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
                         text = btnLabel

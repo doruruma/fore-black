@@ -78,6 +78,16 @@ class OverlayService : Service() {
                 BlackScreen()
             }
         }
+        // create notification channel
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Overlay Service",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+        startForeground(NOTIFICATION_ID, createNotification())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -105,6 +115,7 @@ class OverlayService : Service() {
     }
 
     private fun stop() {
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
         savedStateRegistryOwner.stop()
         serviceLifecycleOwner.stop()
@@ -114,14 +125,6 @@ class OverlayService : Service() {
     }
 
     private fun createNotification(): Notification {
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Overlay Service",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
         val overlayIntent = Intent(this, OverlayServiceActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this,
