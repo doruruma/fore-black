@@ -7,7 +7,9 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
+import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -54,14 +56,22 @@ class OverlayService : Service() {
         serviceLifecycleOwner.start()
         // Create a new ComposeView
         layoutParam = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.MATCH_PARENT,
             LayoutParams.TYPE_APPLICATION_OVERLAY,
             LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             android.graphics.PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val metrics = windowManager.currentWindowMetrics
+                height = metrics.bounds.height()
+                width = metrics.bounds.width()
+            } else {
+                val metrics = DisplayMetrics()
+                windowManager.defaultDisplay.getRealMetrics(metrics)
+                height = metrics.heightPixels
+                width = metrics.widthPixels
+            }
         }
         composeView = ComposeView(this).apply {
             setViewTreeLifecycleOwner(serviceLifecycleOwner)
