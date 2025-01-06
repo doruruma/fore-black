@@ -33,8 +33,6 @@
             android:name=".feature_main.presentation.OverlayServiceActivity"
             android:launchMode="singleTask" />
 
-        <receiver android:name=".feature_main.broadcastReceiver.OverlayBroadcastReceiver" />
-
         <service
             android:name=".feature_main.service.OverlayService"
             android:exported="true"
