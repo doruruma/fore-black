@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -132,92 +131,86 @@ fun HomeScreen() {
         }
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-        Box(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (isPermissionGranted)
-                    Image(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .padding(bottom = 16.dp),
-                        painter = painterResource(R.drawable.floating),
-                        contentScale = ContentScale.Fit,
-                        contentDescription = "notify"
-                    )
-                if (!isPermissionGranted)
-                    Image(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .padding(bottom = 16.dp),
-                        painter = painterResource(R.drawable.notify),
-                        contentScale = ContentScale.Fit,
-                        contentDescription = "notify"
-                    )
-                Text(
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = Neutral90
-                    ),
-                    text = "Welcome to Fore Black"
-                )
-                Text(
-                    modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        color = Neutral80
-                    ),
-                    text = if (isPermissionGranted) "You are ready to go."
-                    else "Allow App to Appear on Top.\nThis permission is required for the app to function properly."
-                )
-                Button(
+            if (isPermissionGranted)
+                Image(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(vertical = 14.dp),
-                    enabled = !isBtnLoading,
-                    onClick = {
-                        if (!isPermissionGranted) {
-                            requestOverlayPermission(context)
-                            return@Button
-                        }
-                        if (!context.hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
-                            notificationPermissionCallback = {
-                                toggleService()
-                            }
-                            requestNotificationPermission()
-                            return@Button
-                        }
-                        toggleService()
-                        Intent(context, OverlayService::class.java).apply {
-                            action = OverlayService.ACTION_START
-                            context.startService(this)
-                        }
-                    }
-                ) {
-                    if (isBtnLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            color = Neutral10
-                        )
+                        .size(120.dp)
+                        .padding(bottom = 16.dp),
+                    painter = painterResource(R.drawable.floating),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = "notify"
+                )
+            if (!isPermissionGranted)
+                Image(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .padding(bottom = 16.dp),
+                    painter = painterResource(R.drawable.notify),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = "notify"
+                )
+            Text(
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Neutral90
+                ),
+                text = "Welcome to Fore Black"
+            )
+            Text(
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    color = Neutral80
+                ),
+                text = if (isPermissionGranted) "You are ready to go."
+                else "Allow App to Appear on Top.\nThis permission is required for the app to function properly."
+            )
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(vertical = 14.dp),
+                enabled = !isBtnLoading,
+                onClick = {
+                    if (!isPermissionGranted) {
+                        requestOverlayPermission(context)
                         return@Button
                     }
-                    Text(
-                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
-                        text = btnLabel
-                    )
+                    if (!context.hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
+                        notificationPermissionCallback = {
+                            toggleService()
+                        }
+                        requestNotificationPermission()
+                        return@Button
+                    }
+                    toggleService()
+                    Intent(context, OverlayService::class.java).apply {
+                        action = OverlayService.ACTION_START
+                        context.startService(this)
+                    }
                 }
+            ) {
+                if (isBtnLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        color = Neutral10
+                    )
+                    return@Button
+                }
+                Text(
+                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
+                    text = btnLabel
+                )
             }
         }
     }

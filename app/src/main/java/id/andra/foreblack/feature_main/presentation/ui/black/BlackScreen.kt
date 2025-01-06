@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,47 +34,43 @@ fun BlackScreen() {
 
     val context = LocalContext.current
 
-    Scaffold(
-        modifier = Modifier.clickable {
-            Intent(context, OverlayService::class.java).apply {
-                action = OverlayService.ACTION_START
-                putExtra("VISIBILITY", OverlayService.HIDE_OVERLAY)
-                context.startService(this)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Black)
+            .clickable {
+                Intent(context, OverlayService::class.java).apply {
+                    action = OverlayService.ACTION_START
+                    putExtra("VISIBILITY", OverlayService.HIDE_OVERLAY)
+                    context.startService(this)
+                }
             }
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.Black)
-                .padding(padding)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                )
-                Text(
-                    style = TextStyle(
-                        color = Color.White,
-                        fontSize = 18.sp
-                    ),
-                    text = "Fore Black is currently running"
-                )
-                Text(
-                    modifier = Modifier.padding(top = 12.dp),
-                    style = TextStyle(
-                        color = Color.White,
-                        fontWeight = FontWeight.W300,
-                        fontSize = 14.sp
-                    ),
-                    text = "tap on the screen to close"
-                )
-            }
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+            )
+            Text(
+                style = TextStyle(
+                    color = Color.White,
+                    fontSize = 18.sp
+                ),
+                text = "Fore Black is currently running"
+            )
+            Text(
+                modifier = Modifier.padding(top = 12.dp),
+                style = TextStyle(
+                    color = Color.White,
+                    fontWeight = FontWeight.W300,
+                    fontSize = 14.sp
+                ),
+                text = "tap on the screen to close"
+            )
         }
     }
 
