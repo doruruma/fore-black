@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dagger.hilt.android.AndroidEntryPoint
+import id.andra.foreblack.R
 import id.andra.foreblack.feature_main.presentation.OverlayServiceActivity
 import id.andra.foreblack.feature_main.presentation.ui.black.BlackScreen
 import id.andra.foreblack.feature_main.util.ServiceLifecycleOwner
@@ -136,7 +137,7 @@ class OverlayService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Fore Black")
             .setContentText("Tap to toggle black screen overlay")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.mipmap.ic_launcher_new_round)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
