@@ -1,6 +1,7 @@
 package id.andra.foreblack.feature_main.presentation.ui.black
 
 import android.content.Intent
+import android.widget.TextClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import id.andra.foreblack.R
 import id.andra.foreblack.feature_main.service.OverlayService
 
 @Preview
@@ -58,12 +61,16 @@ fun BlackScreen() {
                     .fillMaxWidth()
                     .height(64.dp)
             )
-            Text(
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 18.sp
-                ),
-                text = "Fore Black is currently running"
+            AndroidView(
+                factory = { context ->
+                    TextClock(context).apply {
+                        format12Hour?.let { this.format12Hour = "hh:mm" }
+                        timeZone?.let { this.timeZone = it }
+                        textSize.let { this.textSize = 32f }
+                        setTextColor(context.getColor(R.color.white))
+                    }
+                },
+                modifier = Modifier.padding(5.dp),
             )
             Text(
                 modifier = Modifier.padding(top = 12.dp),
