@@ -145,6 +145,7 @@ class OverlayService : Service() {
         )
         // Build the notification
         return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setContentTitle("Fore Black")
             .setContentText("Tap to toggle black screen overlay")
             .setSmallIcon(R.mipmap.ic_launcher_new_round)
