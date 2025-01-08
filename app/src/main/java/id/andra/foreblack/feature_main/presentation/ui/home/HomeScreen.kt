@@ -44,9 +44,6 @@ import id.andra.foreblack.feature_main.presentation.components.OnLifecycleEvent
 import id.andra.foreblack.feature_main.service.OverlayService
 import id.andra.foreblack.feature_main.util.hasPermission
 import id.andra.foreblack.feature_main.util.isMyServiceRunning
-import id.andra.foreblack.ui.theme.Neutral10
-import id.andra.foreblack.ui.theme.Neutral80
-import id.andra.foreblack.ui.theme.Neutral90
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -161,7 +158,6 @@ fun HomeScreen() {
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = Neutral90
                 ),
                 text = "Welcome to Fore Black"
             )
@@ -169,8 +165,7 @@ fun HomeScreen() {
                 modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
                 style = TextStyle(
                     fontSize = 14.sp,
-                    textAlign = TextAlign.Center,
-                    color = Neutral80
+                    textAlign = TextAlign.Center
                 ),
                 text = if (isPermissionGranted) "You are ready to go."
                 else "Allow App to Appear on Top.\nThis permission is required for the app to function properly."
@@ -201,10 +196,7 @@ fun HomeScreen() {
                 }
             ) {
                 if (isBtnLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = Neutral10
-                    )
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
                     return@Button
                 }
                 Text(
