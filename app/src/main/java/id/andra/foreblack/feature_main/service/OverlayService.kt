@@ -143,6 +143,15 @@ class OverlayService : Service() {
             overlayIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val overlayIntentAction = Intent(this, OverlayService::class.java).apply {
+            action = ACTION_STOP
+        }
+        val pendingIntentAction = PendingIntent.getService(
+            this,
+            0,
+            overlayIntentAction,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         // Build the notification
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
@@ -150,6 +159,7 @@ class OverlayService : Service() {
             .setContentText("Tap to toggle black screen overlay")
             .setSmallIcon(R.mipmap.ic_launcher_new_round)
             .setContentIntent(pendingIntent)
+            .addAction(R.mipmap.ic_launcher_new_round, "Stop Fore Black", pendingIntentAction)
             .setOngoing(true)
             .build()
     }
